@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import './App.css';
 
+//edustaa jokaista laudan neliötä
 function Square({ value, onSquareClick }) {
   return (
     <button className="square" onClick={onSquareClick}>
@@ -10,22 +11,27 @@ function Square({ value, onSquareClick }) {
 }
 
 function Board({ xIsNext, squares, onPlay }) {
+  //Event handeleri klikkaukselle
   function handleClick(i) {
+    //onko voittajaa tai onko ruutu jo täytetty
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
     const nextSquares = squares.slice();
+    //laittaa "X" tai "O" riippuen kenen vuoro on (xIsNext)
     if (xIsNext) {
       nextSquares[i] = 'X';
     } else {
       nextSquares[i] = 'O';
     }
+    //kutsutaan onPlay funktio päivitetyillä ruuduilla
     onPlay(nextSquares);
   }
 
   const winner = calculateWinner(squares);
   const isDraw = !squares.includes(null) && !winner;
 
+  //näyttää pelin tämän hetkisen statuksen
   let status;
   if (winner) {
     status = 'Winner: ' + winner;
@@ -35,6 +41,7 @@ function Board({ xIsNext, squares, onPlay }) {
     status = 'Next player: ' + (xIsNext ? 'X' : 'O');
   }
 
+  //pelilaudan ja ruutujen renderöinti
   return (
     <>
       <div className="status">{status}</div>
@@ -57,6 +64,7 @@ function Board({ xIsNext, squares, onPlay }) {
   );
 }
 
+//voitto ruutu jos on voittaja tai tasapeli
 function WinnerScreen({ onReset }) {
   return (
     <div className="winner-screen">
@@ -68,22 +76,26 @@ function WinnerScreen({ onReset }) {
 export default function Game() {
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [currentMove, setCurrentMove] = useState(0);
+  //jos xIsNext on True on "X" vuoro
   const xIsNext = currentMove % 2 === 0;
   const currentSquares = history[currentMove];
   const winner = calculateWinner(currentSquares);
   const isDraw = !currentSquares.includes(null) && !winner;
 
+  //päivittää historia listaan nykyisen siirron ja kertoo kenen vuoro on seuraavaksi
   function handlePlay(nextSquares) {
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
   }
 
+  //event handler pelin resettaukseen
   function handleReset() {
     setHistory([Array(9).fill(null)]);
     setCurrentMove(0);
   }
 
+  //pelin lopetus ruutu, ilmoittaa voittajan jos on, muuten tasapeli
   let resultScreen;
   if (winner) {
     resultScreen = <WinnerScreen result={`Winner: ${winner}`} onReset={handleReset} />;
@@ -102,6 +114,7 @@ export default function Game() {
 }
 
 function calculateWinner(squares) {
+  //Määritetään kaikki tavat voittaa 
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -112,11 +125,13 @@ function calculateWinner(squares) {
     [0, 4, 8],
     [2, 4, 6],
   ];
+  //Tsekataan onko jokaisessa ruudussa sama kuvio X tai O
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
       return squares[a];
     }
   }
+  //null jos ei ole voittajaa
   return null;
 }
